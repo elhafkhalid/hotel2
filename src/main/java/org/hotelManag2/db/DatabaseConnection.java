@@ -12,14 +12,7 @@ public class DatabaseConnection {
     private Connection connection;
 
     private DatabaseConnection() {
-        try{
-            DatabaseConfig config = DatabaseConfig.getInstance();
-            this.connection = DriverManager.getConnection(
-                    config.getUrl(),config.getUser(),config.getPassword()
-            );
-        }catch(SQLException e){
-            throw new BusinessException("Connexion a la base echouéé");
-        }
+        openConnection();
     }
 
     public static DatabaseConnection getInstance(){
@@ -33,7 +26,25 @@ public class DatabaseConnection {
         return instance;
     }
 
-    public Connection getConnection(){
+    public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed()) {
+                openConnection();
+            }
+        } catch (SQLException e) {
+            throw new BusinessException("Connexion à la base échouée : " + e.getMessage());
+        }
         return connection;
+    }
+
+    private void openConnection() {
+        try {
+            DatabaseConfig config = DatabaseConfig.getInstance();
+            this.connection = DriverManager.getConnection(
+                    config.getUrl(), config.getUser(), config.getPassword()
+            );
+        } catch (SQLException e) {
+            throw new BusinessException("Connexion à la base échouée : " + e.getMessage());
+        }
     }
 }
