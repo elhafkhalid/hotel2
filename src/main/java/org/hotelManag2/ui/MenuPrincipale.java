@@ -2,17 +2,20 @@ package org.hotelManag2.ui;
 
 import org.hotelManag2.exception.AuthenticationException;
 import org.hotelManag2.model.User;
-import org.hotelManag2.repository.UserRepository;
 import org.hotelManag2.repository.jdbc.UserRepositoryJDBC;
+import org.hotelManag2.repository.jdbc.RoomRepositoryJDBC;
 import org.hotelManag2.service.AuthService;
+import org.hotelManag2.service.RoomService;
 import org.hotelManag2.util.InputUtils;
 
 
 public class MenuPrincipale {
     private final AuthService authService;
+    private final RoomService roomService;
+
     public MenuPrincipale(){
-        UserRepository userRepository = new UserRepositoryJDBC();
-        this.authService = new AuthService(userRepository);
+        this.authService = new AuthService(new UserRepositoryJDBC());
+        this.roomService = new RoomService(new RoomRepositoryJDBC());
     }
 
     public void start() {
@@ -52,10 +55,12 @@ public class MenuPrincipale {
         String pass = InputUtils.readString("votre pass? : ");
         try {
             User user = authService.login(email,pass);
+
             switch (user.getRole()) {
-                case CLIENT -> new MenuClient().start();
-                case ADMIN -> new MenuAdmin().start();
+                case CLIENT -> new MenuClient(authService,roomService).start();
+                case ADMIN -> new MenuAdmin(authService,roomService).start();
             }
+
         }catch(AuthenticationException e){
             System.out.println("erreur!! : " + e.getMessage());
         }

@@ -65,6 +65,18 @@ public class UserRepositoryJDBC implements UserRepository {
         }
     }
 
+    public void updatePassword(UUID id,String newPasswordHash){
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        Connection connection = DatabaseConnection.getInstance().getConnection();
+        try (PreparedStatement ps = connection.prepareStatement(sql)){
+            ps.setString(1,newPasswordHash);
+            ps.setObject(2,id);
+            ps.executeUpdate();
+        }catch(SQLException e){
+            throw new BusinessException("Mise a jour du mot de passe echouee : " + e.getMessage());
+        }
+    }
+
     private User mapUser(ResultSet rs) throws SQLException {
         return new User(
                 rs.getObject("id", UUID.class),

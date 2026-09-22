@@ -42,6 +42,13 @@ public class AuthService {
         return user;
     }
 
+    public void changePassword(String newPassword){
+       if(!ValidationUtils.isValidPassword(newPassword))
+           throw new AuthenticationException("Le mot de passe doit > 6");
+
+       userRepository.updatePassword(currentUser.getId(),sha256(newPassword));
+    }
+
     public void logout(){
         this.currentUser = null;
     }
