@@ -1,5 +1,7 @@
 package org.hotelManag2.repository;
 
+import org.hotelManag2.dto.AvailableRoomDTO;
+import org.hotelManag2.dto.RoomSearchCriteria;
 import org.hotelManag2.model.Room;
 import org.hotelManag2.model.enums.RoomStatus;
 
@@ -12,4 +14,5 @@ public interface RoomRepository {
     Room findByNumber(String roomNumber);
     void update(Room room);
     void updateStatus(String roomNumber,RoomStatus newStatus);
+    List <AvailableRoomDTO> findAvailable(RoomSearchCriteria criteria);
 }

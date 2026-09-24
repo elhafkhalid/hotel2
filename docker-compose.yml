@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:18
+    container_name: hotel2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hotel2
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - hotel2-pgdata:/var/lib/postgresql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: hotel2-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hotel.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  hotel2-pgdata:

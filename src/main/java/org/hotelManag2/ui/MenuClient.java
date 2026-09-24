@@ -7,20 +7,24 @@ import org.hotelManag2.exception.BusinessException;
 import org.hotelManag2.model.Room;
 import org.hotelManag2.model.User;
 import org.hotelManag2.service.AuthService;
+import org.hotelManag2.service.PricingService;
 import org.hotelManag2.service.RoomService;
 import org.hotelManag2.util.InputUtils;
 import org.hotelManag2.util.MoneyUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 public class MenuClient {
     private final AuthService authService;
     private final RoomService roomService;
+    private final PricingService pricingService;
 
-    public MenuClient(AuthService authService,RoomService roomService){
+    public MenuClient(AuthService authService,RoomService roomService,PricingService pricingService){
         this.authService = authService;
         this.roomService = roomService;
+        this.pricingService = pricingService;
     }
 
     public void start() {
@@ -31,7 +35,7 @@ public class MenuClient {
             System.out.println("2. Changer mon mot de passe");
             System.out.println("3. Voir les chambres");
             System.out.println("4. Rechercher une chambre disponible");
-            System.out.println("3. Se deconnecter");
+            System.out.println("5. Se deconnecter");
             int choice = InputUtils.readInt("Votre choix : ");
             switch (choice) {
                 case 1 -> showProfile();
@@ -101,10 +105,14 @@ public class MenuClient {
             }
 
             for(AvailableRoomDTO room : results){
-                System.out.println("Chambre " + room.getRoomNumber() + " - " + room.getType()
-                        + " - " + room.getCapacity() + " pers - " + MoneyUtils.format(room.getPricePerNight()));
-            }
 
+                BigDecimal prixNuit = pricingService.calculatePricePerNight(room.getPricePerNight(),checkIn,checkOut);
+                BigDecimal totalSejour = pricingService.calculateTotal(room.getPricePerNight(),checkIn,checkOut);
+
+                System.out.println("Chambre " + room.getRoomNumber() + " - " + room.getType()
+                        + " - " + room.getCapacity() + " pers - " + MoneyUtils.format(prixNuit)
+                        + "/nuit - Total sejour : " + MoneyUtils.format(totalSejour));
+            }
 
         } catch(BusinessException e){
             System.out.println("Erreur : " + e.getMessage());

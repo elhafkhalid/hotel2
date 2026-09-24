@@ -1,6 +1,8 @@
 package org.hotelManag2.repository.jdbc;
 
 import org.hotelManag2.db.DatabaseConnection;
+import org.hotelManag2.dto.AvailableRoomDTO;
+import org.hotelManag2.dto.RoomSearchCriteria;
 import org.hotelManag2.exception.BusinessException;
 import org.hotelManag2.model.Room;
 import org.hotelManag2.model.enums.RoomStatus;
@@ -123,6 +125,44 @@ public class RoomRepositoryJDBC implements RoomRepository {
 
         }catch(SQLException e){
             throw new BusinessException("Recherche de la chambre echouee : " + e.getMessage());
+        }
+    }
+
+    public List<AvailableRoomDTO> findAvailable(RoomSearchCriteria criteria){
+        String sql = "SELECT r.room_number, r.type, r.capacity, r.price_per_night, r.status "
+                + "FROM rooms r "
+                + "WHERE r.status = 'AVAILABLE' "
+                + "AND r.capacity >= ? "
+                + "AND NOT EXISTS ("
+                + "SELECT 1 FROM reservations res "
+                + "WHERE res.room_number = r.room_number "
+                + "AND res.status = 'CONFIRMED' "
+                + "AND res.check_in < ? AND res.check_out > ? "
+                +")";
+
+        Connection connection = DatabaseConnection.getInstance().getConnection();
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)){
+
+            ps.setInt(1,criteria.getGuests());
+            ps.setObject(2,criteria.getCheckOut());
+            ps.setObject(3,criteria.getCheckIn());
+
+            try(ResultSet rs = ps.executeQuery()) {
+                List<AvailableRoomDTO> rooms = new ArrayList<>();
+                while(rs.next()){
+                    rooms.add(new AvailableRoomDTO(
+                            rs.getString("room_number"),
+                            RoomType.valueOf(rs.getString("type")),
+                            rs.getInt("capacity"),
+                            rs.getBigDecimal("price_per_night"),
+                            RoomStatus.valueOf(rs.getString("status"))));
+                }
+                return rooms;
+            }
+        }catch(SQLException e){
+            throw new BusinessException("Recherche de disponibilite echouee : " + e.getMessage());
+
         }
     }
 

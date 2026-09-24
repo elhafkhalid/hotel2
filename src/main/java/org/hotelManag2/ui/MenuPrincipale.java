@@ -5,6 +5,7 @@ import org.hotelManag2.model.User;
 import org.hotelManag2.repository.jdbc.UserRepositoryJDBC;
 import org.hotelManag2.repository.jdbc.RoomRepositoryJDBC;
 import org.hotelManag2.service.AuthService;
+import org.hotelManag2.service.PricingService;
 import org.hotelManag2.service.RoomService;
 import org.hotelManag2.util.InputUtils;
 
@@ -12,10 +13,12 @@ import org.hotelManag2.util.InputUtils;
 public class MenuPrincipale {
     private final AuthService authService;
     private final RoomService roomService;
+    private final PricingService pricingService;
 
     public MenuPrincipale(){
         this.authService = new AuthService(new UserRepositoryJDBC());
         this.roomService = new RoomService(new RoomRepositoryJDBC());
+        this.pricingService = new PricingService();
     }
 
     public void start() {
@@ -57,7 +60,7 @@ public class MenuPrincipale {
             User user = authService.login(email,pass);
 
             switch (user.getRole()) {
-                case CLIENT -> new MenuClient(authService,roomService).start();
+                case CLIENT -> new MenuClient(authService,roomService,pricingService).start();
                 case ADMIN -> new MenuAdmin(authService,roomService).start();
             }
 
