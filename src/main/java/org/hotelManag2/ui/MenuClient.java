@@ -1,13 +1,16 @@
 package org.hotelManag2.ui;
 
 import org.hotelManag2.dto.AvailableRoomDTO;
+import org.hotelManag2.dto.ReservationSummaryDTO;
 import org.hotelManag2.dto.RoomSearchCriteria;
 import org.hotelManag2.exception.AuthenticationException;
 import org.hotelManag2.exception.BusinessException;
+import org.hotelManag2.model.Reservation;
 import org.hotelManag2.model.Room;
 import org.hotelManag2.model.User;
 import org.hotelManag2.service.AuthService;
 import org.hotelManag2.service.PricingService;
+import org.hotelManag2.service.ReservationService;
 import org.hotelManag2.service.RoomService;
 import org.hotelManag2.util.InputUtils;
 import org.hotelManag2.util.MoneyUtils;
@@ -20,11 +23,13 @@ public class MenuClient {
     private final AuthService authService;
     private final RoomService roomService;
     private final PricingService pricingService;
+    private final ReservationService reservationService;
 
-    public MenuClient(AuthService authService,RoomService roomService,PricingService pricingService){
+    public MenuClient(AuthService authService,RoomService roomService,PricingService pricingService,ReservationService reservationService){
         this.authService = authService;
         this.roomService = roomService;
         this.pricingService = pricingService;
+        this.reservationService = reservationService;
     }
 
     public void start() {
@@ -35,6 +40,8 @@ public class MenuClient {
             System.out.println("2. Changer mon mot de passe");
             System.out.println("3. Voir les chambres");
             System.out.println("4. Rechercher une chambre disponible");
+            System.out.println("5. Reserver une chambre");
+            System.out.println("6. Mes reservations");
             System.out.println("5. Se deconnecter");
             int choice = InputUtils.readInt("Votre choix : ");
             switch (choice) {
@@ -42,7 +49,9 @@ public class MenuClient {
                 case 2 -> changePassword();
                 case 3 -> showRooms();
                 case 4 -> searchRooms();
-                case 5 -> {
+                case 5 -> reserveRoom();
+                case 6 -> myReservations();
+                case 7 -> {
                     authService.logout();
                     System.out.println("Deconnexion reussie.");
                     return;
@@ -119,5 +128,47 @@ public class MenuClient {
         }
 
     }
+
+
+    private void reserveRoom(){
+        showRooms();
+
+        String roomNumber = InputUtils.readString("Numbero de chambre? : ");
+        LocalDate checkIn = InputUtils.readDate("date d'arrivee? : (JJ/MM/AAAA) : ");
+        LocalDate checkOut = InputUtils.readDate("date de depart? : (JJ/MM/AAAA) : ");
+
+        int guests = InputUtils.readInt("nbr de voyageurs? : ");
+
+        try {
+
+            ReservationSummaryDTO reservation = reservationService.
+                    createReservation(authService.getCurrentUser().getId(),roomNumber,checkIn,checkOut,guests);
+
+            System.out.println("Reservation creee : code " + reservation.getCode()
+                    + " - Chambre " + reservation.getRoomNumber()
+                    + " - Total : " + MoneyUtils.format(reservation.getTotal()));
+
+        }catch(BusinessException e){
+            System.out.println("Erreur : " + e.getMessage());
+        }
+    }
+
+
+    private void myReservations(){
+        List<Reservation> reservations = reservationService.findByUser(authService.getCurrentUser().getId());
+        if(reservations.isEmpty()) {
+            System.out.println("Aucune reservation.");
+            return;
+        }
+
+        for(Reservation r : reservations){
+            System.out.println(r.getCode() + " - chambre " + r.getRoomNumber()
+                    + " - " + r.getCheckIn() + " -> " + r.getCheckOut()
+                    + " - " + r.getGuests() + " pers - " + r.getStatus()
+                    + " - " + MoneyUtils.format(r.getTotal()));
+        }
+    }
+
+
 
 }
