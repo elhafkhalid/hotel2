@@ -42,7 +42,7 @@ public class MenuClient {
             System.out.println("4. Rechercher une chambre disponible");
             System.out.println("5. Reserver une chambre");
             System.out.println("6. Mes reservations");
-            System.out.println("5. Se deconnecter");
+            System.out.println("7. Se deconnecter");
             int choice = InputUtils.readInt("Votre choix : ");
             switch (choice) {
                 case 1 -> showProfile();
@@ -139,10 +139,10 @@ public class MenuClient {
 
         int guests = InputUtils.readInt("nbr de voyageurs? : ");
 
-        try {
+        try{
 
             ReservationSummaryDTO reservation = reservationService.
-                    createReservation(authService.getCurrentUser().getId(),roomNumber,checkIn,checkOut,guests);
+                    createReservation(authService.getCurrentUser().getId(),roomNumber,guests,checkIn,checkOut);
 
             System.out.println("Reservation creee : code " + reservation.getCode()
                     + " - Chambre " + reservation.getRoomNumber()

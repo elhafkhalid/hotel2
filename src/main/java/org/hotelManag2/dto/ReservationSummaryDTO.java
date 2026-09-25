@@ -7,16 +7,16 @@ import java.time.LocalDate;
 
 public class ReservationSummaryDTO {
     private final String code;
-    private final String roomNumber;
     private final LocalDate checkIn;
     private final LocalDate checkOut;
-    private final int nights;
     private final int guests;
+    private final int nights;
     private final BigDecimal total;
     private final ReservationStatus status;
+    private final String roomNumber;
 
-    public ReservationSummaryDTO(String code, String roomNumber, LocalDate checkIn, LocalDate checkOut,
-                                 int nights, int guests, BigDecimal total, ReservationStatus status) {
+    public ReservationSummaryDTO(String code, LocalDate checkIn, LocalDate checkOut,
+                                 int guests ,int nights,BigDecimal total,String roomNumber,ReservationStatus status) {
         this.code = code;
         this.roomNumber = roomNumber;
         this.checkIn = checkIn;
@@ -42,14 +42,6 @@ public class ReservationSummaryDTO {
 
     public LocalDate getCheckOut() {
         return checkOut;
-    }
-
-    public int getNights() {
-        return nights;
-    }
-
-    public int getGuests() {
-        return guests;
     }
 
     public BigDecimal getTotal() {

@@ -2,10 +2,12 @@ package org.hotelManag2.ui;
 
 import org.hotelManag2.exception.AuthenticationException;
 import org.hotelManag2.model.User;
+import org.hotelManag2.repository.jdbc.ReservationRepositoryJDBC;
 import org.hotelManag2.repository.jdbc.UserRepositoryJDBC;
 import org.hotelManag2.repository.jdbc.RoomRepositoryJDBC;
 import org.hotelManag2.service.AuthService;
 import org.hotelManag2.service.PricingService;
+import org.hotelManag2.service.ReservationService;
 import org.hotelManag2.service.RoomService;
 import org.hotelManag2.util.InputUtils;
 
@@ -14,11 +16,13 @@ public class MenuPrincipale {
     private final AuthService authService;
     private final RoomService roomService;
     private final PricingService pricingService;
+    private final ReservationService reservationService;
 
     public MenuPrincipale(){
         this.authService = new AuthService(new UserRepositoryJDBC());
         this.roomService = new RoomService(new RoomRepositoryJDBC());
         this.pricingService = new PricingService();
+        this.reservationService = new ReservationService(new RoomRepositoryJDBC(),new ReservationRepositoryJDBC(),pricingService);
     }
 
     public void start() {
@@ -60,7 +64,7 @@ public class MenuPrincipale {
             User user = authService.login(email,pass);
 
             switch (user.getRole()) {
-                case CLIENT -> new MenuClient(authService,roomService,pricingService).start();
+                case CLIENT -> new MenuClient(authService,roomService,pricingService,reservationService).start();
                 case ADMIN -> new MenuAdmin(authService,roomService).start();
             }
 
